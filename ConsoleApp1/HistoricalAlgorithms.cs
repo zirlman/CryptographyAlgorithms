@@ -15,18 +15,18 @@ namespace CryptographyAlgorithms
         {
             string encoded = "";
             int tmp = 0;
-            foreach (char c in msg)
+            foreach (int c in msg)
                 if (c >= 'A' && c <= 'Z')
                 {
                     tmp = (c - 25 - 'A') % 26;
                     tmp = tmp >= 0 ? tmp : tmp * (-1);
-                    encoded += (char)('A' + tmp);
+                    encoded += (int)('A' + tmp);
                 }
                 else if (c >= 'a' && c <= 'z')
                 {
                     tmp = (c - 25 - 'a') % 26;
                     tmp = tmp >= 0 ? tmp : tmp * (-1);
-                    encoded += (char)('a' + tmp);
+                    encoded += (int)('a' + tmp);
                 }
                 else
                     encoded += c;
@@ -36,11 +36,11 @@ namespace CryptographyAlgorithms
         // Returns a coded message using the Rotation algorithm
         // or a human readable message using the Rotation algorithm
         // It depends from the flag ( e for encode, d for decode )
-        public static string RotationEncodeAndDecode(string msg, int step, char flag)
+        public static string RotationEncodeAndDecode(string msg, int step, int flag)
         {
             string returnMessage = "";
             int tmp = 0;
-            foreach (char c in msg)
+            foreach (int c in msg)
                 if (c >= 'A' && c <= 'Z')
                 {
                     if (flag == 'e' || flag == 'E')
@@ -51,7 +51,7 @@ namespace CryptographyAlgorithms
                         // U slucaju da je broj negativan predstavi  ga kao pozitivan moduo ( -3 <=> 23 )
                         tmp = tmp >= 0 ? tmp : tmp + 26;
                     }
-                    returnMessage += (char)('A' + tmp);
+                    returnMessage += (int)('A' + tmp);
                 }
                 else if (c >= 'a' && c <= 'z')
                 {
@@ -63,7 +63,7 @@ namespace CryptographyAlgorithms
                         // U slucaju da je broj negativan predstavi  ga kao pozitivan moduo ( -3 <=> 23 )
                         tmp = tmp >= 0 ? tmp : tmp + 26;
                     }
-                    returnMessage += (char)('a' + tmp);
+                    returnMessage += (int)('a' + tmp);
                 }
                 else
                     returnMessage += c;
@@ -74,7 +74,7 @@ namespace CryptographyAlgorithms
         // or a human readable message using the Rotation algorithm and the Serbian alphabet
         // It depends from the flag ( e for encode, d for decode )
         // U PITANJU JE JEBENA AZBUKA JER DJURIC PISE AZBUKU LATINICNIM SLOVIMA
-        public static string SerbianAlphabetRotationEncodeAndDecode(string msg, int step, char flag)
+        public static string SerbianAlphabetRotationEncodeAndDecode(string msg, int step, int flag)
         {
             //ArrayList alphabetLowerCase = new ArrayList(new string[] { "a", "b", "c", "č", "ć", "d", "dž", "đ", "e", "f", "g", "h", "i", "j", "k", "l", "lj", "m", "n", "nj", "o", "p", "r", "s", "š", "t", "u", "v", "z", "ž" });
             ArrayList alphabetLowerCase = new ArrayList(new string[] { "a", "b", "v", "g", "d", "đ", "e", "ž", "z", "i", "j", "k", "l", "lj", "m", "n", "nj", "o", "p", "r", "s", "t", "ć", "u", "f", "h", "c", "č", "dž", "š" });
@@ -124,7 +124,7 @@ namespace CryptographyAlgorithms
             return returnMessage;
         }
 
-        static void Main(string[] args)
+        static void Main1(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             string msg1 = "ETFUKZALRVRPIOLIESNOVST";
@@ -160,4 +160,86 @@ namespace CryptographyAlgorithms
         }
 
     }
+
+    class RC4
+    {
+        int[] s;
+        int[] k;
+
+        RC4(int sLength, string[] kArray)
+        {
+            s = new int[sLength];
+            k = new int[kArray.Length];
+
+            for (int i = 0; i < s.Length; ++i)
+                s[i] = i;
+            for (int j = 0; j < kArray.Length; ++j)
+                k[j] = int.Parse(kArray[j]);
+        }
+
+        public void KSA()
+        {
+            int j = 0;
+            for (int i = 0; i < s.Length; ++i)
+            {
+                j = (j + s[i] + k[i % k.Length]) % s.Length;
+                Swap(i, j);
+            }
+            Console.Write("KSA: S[");
+            foreach (int i in s)
+                Console.Write(i + " ");
+            Console.WriteLine("]");
+        }
+
+        public void PRGA()
+        {
+            int i = 0;
+            int j = 0;
+            int output = -1;
+            while (output != 0)
+            {
+                i = (i + 1) % s.Length;
+                j = (j + s[i]) % s.Length;
+                Swap(i, j);
+                output = s[(s[i] + s[j]) % s.Length];
+            }
+            Console.Write("PRGA: S[");
+            foreach (int k in s)
+                Console.Write(k + " ");
+            Console.WriteLine("]");
+        }
+
+        private void Swap(int i, int j)
+        {
+            int tmp = s[i];
+            s[i] = s[j];
+            s[j] = tmp;
+        }
+
+        static void Main(string[] args)
+        {
+            int sn;
+            string tmp;
+            string[] kn;
+            try
+            {
+                Console.Write("Vector size: ");
+                sn = int.Parse(Console.ReadLine());
+
+                Console.Write("Key: ");
+                tmp = Console.ReadLine();
+                kn = tmp.Split(' ');
+
+                RC4 rc4Generator = new RC4(sn, kn);
+                rc4Generator.KSA();
+                rc4Generator.PRGA();
+            }
+            catch (InvalidCastException e)
+            {
+                Console.WriteLine(e);
+            }
+            Console.ReadKey();
+        }
+    }
+
 }
