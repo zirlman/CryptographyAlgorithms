@@ -165,6 +165,8 @@ namespace CryptographyAlgorithms
     {
         int[] s;
         int[] k;
+        int[] plainText;
+        int[] cipherText;
 
         RC4(int sLength, string[] kArray)
         {
@@ -177,14 +179,21 @@ namespace CryptographyAlgorithms
                 k[j] = int.Parse(kArray[j]);
         }
 
-        public void KSA()
+        public void KSA(char[] pText)
         {
+            plainText = new int[pText.Length];
+            cipherText = new int[pText.Length];
+
+            for (int i = 0; i < pText.Length; ++i)
+                plainText[i] = pText[i];
+
             int j = 0;
             for (int i = 0; i < s.Length; ++i)
             {
                 j = (j + s[i] + k[i % k.Length]) % s.Length;
                 Swap(i, j);
             }
+
             Console.Write("KSA: S[");
             foreach (int i in s)
                 Console.Write(i + " ");
@@ -193,20 +202,32 @@ namespace CryptographyAlgorithms
 
         public void PRGA()
         {
-            int i = 0;
-            int j = 0;
+            int i, j, k;
+            i = j = k = 0;
             int output = -1;
             while (output != 0)
             {
                 i = (i + 1) % s.Length;
                 j = (j + s[i]) % s.Length;
                 Swap(i, j);
-                output = s[(s[i] + s[j]) % s.Length];
+                output = (int)(s[(s[i] + s[j]) % s.Length]);
+                cipherText[k] = plainText[k++] ^ output;
             }
+
             Console.Write("PRGA: S[");
-            foreach (int k in s)
-                Console.Write(k + " ");
+            foreach (int m in s)
+                Console.Write(m + " ");
             Console.WriteLine("]");
+
+            Console.Write("Plaintext: ");
+            foreach (int m in plainText)
+                Console.Write((char)m);
+            Console.WriteLine();
+
+            Console.Write("Ciphertext: ");
+            foreach (int m in cipherText)
+                Console.Write((char)m);
+            Console.WriteLine();
         }
 
         private void Swap(int i, int j)
@@ -221,6 +242,7 @@ namespace CryptographyAlgorithms
             int sn;
             string tmp;
             string[] kn;
+            char[] tmpArr;
             try
             {
                 Console.Write("Vector size: ");
@@ -230,8 +252,11 @@ namespace CryptographyAlgorithms
                 tmp = Console.ReadLine();
                 kn = tmp.Split(' ');
 
+                Console.Write("Enter plaintext: ");
+                tmpArr = Console.ReadLine().ToCharArray();
+
                 RC4 rc4Generator = new RC4(sn, kn);
-                rc4Generator.KSA();
+                rc4Generator.KSA(tmpArr);
                 rc4Generator.PRGA();
             }
             catch (InvalidCastException e)
