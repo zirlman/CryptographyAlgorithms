@@ -211,7 +211,10 @@ namespace CryptographyAlgorithms
                 j = (j + s[i]) % s.Length;
                 Swap(i, j);
                 output = (int)(s[(s[i] + s[j]) % s.Length]);
-                cipherText[k] = plainText[k++] ^ output;
+                // Encription
+                cipherText[k] = plainText[k] ^ output;
+                // Decription
+                plainText[k] = cipherText[k++] ^ output;
             }
 
             Console.Write("PRGA: S[");
@@ -237,7 +240,7 @@ namespace CryptographyAlgorithms
             s[j] = tmp;
         }
 
-        static void Main(string[] args)
+        /*static void Main(string[] args)
         {
             int sn;
             string tmp;
@@ -264,7 +267,68 @@ namespace CryptographyAlgorithms
                 Console.WriteLine(e);
             }
             Console.ReadKey();
-        }
+        }*/
     }
 
+    class Monosubtitution
+    {
+        char[] cipher;
+        byte[] visited;
+
+        Monosubtitution(char[] cipher, int flag)
+        {
+            this.cipher = new char[cipher.Length];
+            this.cipher = cipher;
+            visited = new byte[cipher.Length];
+            // flag = 1 use Cyrilic input
+            if (flag == 1)
+            {
+                Console.InputEncoding = Encoding.Unicode;
+                Console.OutputEncoding = Encoding.Unicode;
+            }
+        }
+
+        void ReplaceCharacter(char old, char newChar)
+        {
+            for (int i = 0; i < cipher.Length; ++i)
+            {
+                // This prevents changing characters that are already changed
+                // If the character isn't already changed, change it
+                if (visited[i] == 0 && cipher[i].Equals(old))
+                {
+                    visited[i] = 1;
+                    cipher[i] = newChar;
+                }
+            }
+        }
+
+        void StartDecription()
+        {
+            string input;
+            string[] arr;
+            Console.WriteLine(cipher);
+            Console.Write("Replace: ");
+            input = Console.ReadLine();
+            while (!input.Equals("КРАЈ"))
+            {
+                // Input format: А,Б
+                arr = input.Split(',');
+                ReplaceCharacter(arr[0].ToCharArray()[0], arr[1].ToCharArray()[0]);
+                Console.Clear();
+                Console.WriteLine(cipher);
+                Console.Write("Replace: ");
+                input = Console.ReadLine();
+
+            }
+        }
+        public static void Main(string[] args)
+        {
+            string text = @"РЏКСЦЂЊР ШЗЦР ХЦХ РЏКСЦЂЊ ЖЂГРД ЏС БСЖРЦАХ ЖЂГРД ЕРОГРУСА АР БРГЕЂЊХБ ВЂЧХБР З ВРГХТЗ Х ЋРАРЕ ЏС ТАРБСАХЖЂЕЖ Х ЕХБПЂЦ ВРГХТР. ЕРОГРУСАР ЏС ШГРЏСБ ЋСЊСЖАРСЕЖЂО ЊСШР ШРЂ СШЕВЂАРЖ ТР ЕЊСЖЕШЗ ХТЦЂФПЗ ВЂЊЂЋЂБ ВГЂЕЦРЊС ЕЖЂОЂЋХЉДХМС КГРАМЗЕШС ГСЊЂЦЗМХЏС. ЋЂ ЖГХЋСЕСЖХИ ОЂЋХАР ЋЊРЋСЕСЖЂО ЊСШР ЏС ПХЦР АРЏЊСЈС ТЋРДС АР ЕЊСЖЗ ЕР ЕЊЂЏХИ ЖГХЕЖЂ БСЖРГР ЊХЕХАС. 
+ХБС ЏС ЋЂПХЂ ВЂ ХАФСДСГЗ ШЂЏХ ОР ЏС ВГЂЏСШЖЂЊРЂ ОХЕЖРЊЗ РЏКСЦЗ. ЋРАРЕ ЏС ТАРНРЏАР ЖЗГХЕЖХНШР РЖГРШМХЏР ЕР ВГСШЂ ВСЖ БХЦХЂАР ВЂЕСЖХЦРМР ОЂЋХЉДС. ЖЂГРД ЏС ОГРУСА ЋЊС ОЂЋХАС Х ВЂЕЦЗФХЂ ЏС ШРЂ ОЦРЊАР ШРВХЏР ТР ЗЦРТ АР ЕЊСЖЕШЗ ХТЦЂФПЗ. ЕЖГЗШЖЗГР ЏС ЕРЕЖРЊЧСАР ЂЋ ЂЕРБАРСЕЖ ИХЧРЋР ЋСЦЂЊР ЂЋ ЦХЊСАЂО ОЊЂФУР, ЗТ ВЂБЂЈ ЋЊР Х ВЂ БХЦХЂАР ТРШЂЊХМР. ЕЖГЗШЖЗГАХ ВГЂГРНЗА ЏС ЗГРЋХЂ БЂГХЕ ШСЉЦСА. 
+ТР ЊГСБС ХТОГРЋДС, ТРИЊРЧЗЏЗЈХ БСГРБР ПСТПСЋАЂЕЖХ ШЂЏС ЏС РЏКСЦ ЗЊСЂ, ВЂОХАЗЂ ЏС ЕРБЂ ЏСЋРА ГРЋАХШ, ЉЖЂ ЏС ТР ЖЂ ЊГСБС ПХЦЂ ХТЗТСЖАЂ ЋЂЕЖХОАЗЈС. ЂЋГФРЊРДС ЖЂГДР ЕС ЕРЕЖЂЏХ З АРАЂЉСДЗ ВГСБРТР АР МСЦЗ ЕЖГЗШЖЗГЗ ЂЋ ВСЋСЕСЖ ЖЂАР ПЂЏС ЕЊРШХИ ЕСЋРБ ОЂЋХАР ГРЋХ ТРЉЖХЖС ЂЋ ШЂГЂТХЏС.
+ВЂЊГСБСАЂ ЕС ПЂЏР БСДР. ЖГСАЗЖАЂ ЏС ЖЂГРД ЕБСУС ПЂЏС. ТРЊХЕАЂ ЂЋ ЊГСБСАЕШХИ ЗЕЦЂЊР ЊГИ ЖЂГДР БЂФС ЋР ЂЋЕЖЗВХ ЂЋ ЊСГЖХШРЦС ЋЂ ЂЕРБ ЕРАЖХБСЖРГР З ЕЖГРАЗ ЂЋ ЕЗАМР. ВЂБСГРДС АРЕЖРЏС ТПЂО АСГРЊАЂБСГАЂО ТРОГСЊРДР БСЖРЦР АР ЕЗАНРАЂЏ Х АР ЕЖГРАХ З ЕСАМХ. ШРЋР ЏС ЖЂГРД ЕРОГРУСА, АСШХ ВРГХФРАХ ЕЗ ЕБРЖГРЦХ ЋР ЏС ГЗОЦЂ Х ЋР ОР ЖГСПР ВЂГЗЉХЖХ. ЋРАРЕ ЕС ЕБРЖГР ТР ЏСЋАЂ ЂЋ ГСБСШ ЋСЦР РГИХЖСШЖЗГС З ЕЊСЖЗ.";
+            Monosubtitution ms = new Monosubtitution(text.ToCharArray(), 1);
+            ms.StartDecription();
+        }
+    }
 }
